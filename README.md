@@ -29,7 +29,7 @@ Bash script to install Ubuntu 25.10, Gnome DE, Wayland with ZFS on Root and ZFSB
 
    # edit the network interfaces file to insure internet and Lan connectivities (Case of two network interfaces)
    root@debian:~# nano /etc/netplan/00_--------config.yaml
-  network:
+   network:
     version: 2
     renderer: networkd
     ethernets:
