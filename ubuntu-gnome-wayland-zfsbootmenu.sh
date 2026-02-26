@@ -3,6 +3,7 @@
 # Bash script to install Ubuntu 25.10, Gnome DE, Wayland with ZFS on Root and ZFSBootMenu
 
 # Automatically set other variables
+PHY_DRIVE="/dev/sda"
 
 # First, define variables that refer to the disk and partition number that will hold boot files:
 # Single SATA disk :
@@ -49,9 +50,15 @@ IF_PHY_NETMASK_HOA="24"
 IF_PHY_GATEWAY_HOA="192.168.59.1"
 #----------------------------------
 # From : https://docs.zfsbootmenu.org/en/latest/guides/debian/uefi.html#
+# Install helpers
+apt install -y --no-install-recommends locales tzdata keyboard-configuration console-setup
+
+# Note : You should always enable the en_US.UTF-8 locale because some programs require it.
+echo "Configure packages to customize local and console properties..."
+dpkg-reconfigure locales tzdata keyboard-configuration console-setup
 
 # Install helpers
-apt install -y debootstrap gdisk dkms zfs-dkms zfsutils-linux shim-signed mokutil
+apt install -y debootstrap parted gdisk dkms zfs-dkms zfsutils-linux
 
 # Generate /etc/hostid
 zgenhostid -f
@@ -61,24 +68,22 @@ zgenhostid -f
 lsblk
 
 # Disk preparation
+parted "$PHY_DRIVE" mklabel gpt
+
 # Wipe partitions
 zpool destroy -f $ZPOOL_NAME
 zpool clear -F $ZPOOL_NAME
 zpool labelclear -f $POOL_DEVICE
 
-wipefs -a "$POOL_DISK"
-wipefs -a "$SWAP_DISK"
-wipefs -a "$BOOT_DISK"
+wipefs -a "$PHY_DRIVE"
 
-sgdisk --zap-all "$POOL_DISK"
-sgdisk --zap-all "$SWAP_DISK"
-sgdisk --zap-all "$BOOT_DISK"
+sgdisk --zap-all "$PHY_DRIVE"
 
 # Create EFI boot partition
 sgdisk -n "${BOOT_PART}:1m:+512m" -t "${BOOT_PART}:ef00" -c "${BOOT_PART}:EFI System Partition" "$BOOT_DISK"
 
 # Create SWAP partition
-sgdisk -n "${SWAP_PART}:1m:+12G" -t "${SWAP_PART}:8200" -c "${SWAP_PART}:Linux Ubuntu SWAP" "$SWAP_DISK"
+sgdisk -n "${SWAP_PART}:0:+12G" -t "${SWAP_PART}:8200" -c "${SWAP_PART}:Linux Ubuntu SWAP" "$SWAP_DISK"
 
 # Create zpool partition
 sgdisk -n "${POOL_PART}:0:-10m" -t "${POOL_PART}:bf00" -c "${POOL_PART}:Ubuntu ZFS zroot Partition" "$POOL_DISK"
@@ -207,9 +212,7 @@ apt update
 apt upgrade -y
 
 # Install helpers
-apt install -y --no-install-recommends linux-generic locales keyboard-configuration console-setup shim-signed mokutil
-
-apt install -y locales tzdata keyboard-configuration console-setup
+apt install -y --no-install-recommends linux-generic locales tzdata keyboard-configuration console-setup
 
 # Note : You should always enable the en_US.UTF-8 locale because some programs require it.
 echo "Configure packages to customize local and console properties..."
@@ -246,6 +249,7 @@ zfs set org.zfsbootmenu:commandline="quiet" $ZPOOL_NAME/ROOT
 # Create a vfat filesystem
 
 mkfs.vfat -F32 "$BOOT_DEVICE"
+mkswap "$SWAP_DEVICE"
 
 # Create an fstab entry and mount
 echo "\$(blkid | grep "$BOOT_DEVICE" | cut -d ' ' -f 2) /boot/efi vfat defaults 0 0" >> /etc/fstab
@@ -282,15 +286,13 @@ apt install -y ethtool ifupdown tcpdump nmap nano htop openssh-server git tmux
 # Installing Gnome Desktop environment with Wayland and Support compatibility for running individual X11 applications
 echo "Installing Gnome Desktop environment with Wayland"
 echo "and Support compatibility for running individual X11 applications..."
-apt install -y ubuntu-desktop gnome-session gnome-session-common gnome-shell-ubuntu-extensions gnome-shell gnome-shell-common gnome-shell-extensions gnome-shell-extensions-common gnome-shell-extension-appindicator gnome-shell-extension-apps-menu gnome-shell-extension-auto-move-windows gnome-shell-extension-desktop-icons-ng 
-apt install -y gdm3 xwayland
+apt install -y ubuntu-desktop gdm3 xwayland ubuntu-restricted-extras network-manager-gnome
 
  systemctl start gdm3
  systemctl enable gdm3
  systemctl status gdm3
  
 export DEBIAN_FRONTEND=noninteractive
-apt install -y gnome-software ubuntu-restricted-extras network-manager-gnome gnome-control-center
 
 # Installing IDE Pycharm-Community | PyCharm Installation Instructions : 
 echo "Installing IDE Pycharm-Community..."
