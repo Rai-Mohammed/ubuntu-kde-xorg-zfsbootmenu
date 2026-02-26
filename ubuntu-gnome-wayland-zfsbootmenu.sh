@@ -12,9 +12,9 @@ BOOT_DEVICE="${BOOT_DISK}${BOOT_PART}"
 
 # Second, define variables that refer to the disk and partition number that will hold swap files:
 # Single SATA disk :
-BOOT_DISK="/dev/sda"
+SWAP_DISK="/dev/sda"
 SWAP_PART="2"
-BOOT_DEVICE="${SWAP_DISK}${SWAP_PART}"
+SWAP_DEVICE="${SWAP_DISK}${SWAP_PART}"
 
 # Next, define variables that refer to the disk and partition number that will hold the ZFS pool:
 # Single SATA disk :
