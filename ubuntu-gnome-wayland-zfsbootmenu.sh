@@ -244,12 +244,20 @@ update-initramfs -c -k all
 zfs set org.zfsbootmenu:commandline="quiet" $ZPOOL_NAME/ROOT
 
 # Create a vfat filesystem
-
 mkfs.vfat -F32 "$BOOT_DEVICE"
+
+# Add and Activate a Swap Partition
 mkswap "$SWAP_DEVICE"
+swapon "$SWAP_DEVICE"
+
+# Find the UUID of the new swap partition: blkid
+blkid | grep swap
 
 # Create an fstab entry and mount
 echo "\$(blkid | grep "$BOOT_DEVICE" | cut -d ' ' -f 2) /boot/efi vfat defaults 0 0" >> /etc/fstab
+
+# Make Swap Permanent (/etc/fstab)
+# Add this line to the end: UUID=your-uuid-here none swap sw 0 0
 cat /etc/fstab
 
 mkdir -p /boot/efi
@@ -285,7 +293,7 @@ echo "Installing Gnome Desktop environment with Wayland"
 echo "and Support compatibility for running individual X11 applications..."
 export DEBIAN_FRONTEND=noninteractive
 apt install -y ubuntu-desktop gdm3 xwayland ubuntu-restricted-extras network-manager-gnome snapd
-snap install -y snap-store 
+snap install snap-store bare core22 core24 desktop-security-center firefox firmware-updater gnome-42-2204 gtk-common-themes snapd 
 
  systemctl start gdm3
  systemctl enable gdm3
