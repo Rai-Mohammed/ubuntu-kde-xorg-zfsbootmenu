@@ -10,10 +10,16 @@ BOOT_DISK="/dev/sda"
 BOOT_PART="1"
 BOOT_DEVICE="${BOOT_DISK}${BOOT_PART}"
 
+# Second, define variables that refer to the disk and partition number that will hold swap files:
+# Single SATA disk :
+BOOT_DISK="/dev/sda"
+SWAP_PART="2"
+BOOT_DEVICE="${SWAP_DISK}${SWAP_PART}"
+
 # Next, define variables that refer to the disk and partition number that will hold the ZFS pool:
 # Single SATA disk :
 POOL_DISK="/dev/sda"
-POOL_PART="2"
+POOL_PART="3"
 POOL_DEVICE="${POOL_DISK}${POOL_PART}"
 
 ZPOOL_NAME="zroot"
@@ -45,7 +51,7 @@ IF_PHY_GATEWAY_HOA="192.168.59.1"
 # From : https://docs.zfsbootmenu.org/en/latest/guides/debian/uefi.html#
 
 # Install helpers
-apt install -y debootstrap gdisk dkms zfs-dkms zfsutils-linux
+apt install -y debootstrap gdisk dkms zfs-dkms zfsutils-linux shim-signed mokutil
 
 # Generate /etc/hostid
 zgenhostid -f
@@ -61,16 +67,21 @@ zpool clear -F $ZPOOL_NAME
 zpool labelclear -f $POOL_DEVICE
 
 wipefs -a "$POOL_DISK"
+wipefs -a "$SWAP_DISK"
 wipefs -a "$BOOT_DISK"
 
 sgdisk --zap-all "$POOL_DISK"
+sgdisk --zap-all "$SWAP_DISK"
 sgdisk --zap-all "$BOOT_DISK"
 
 # Create EFI boot partition
-sgdisk -n "${BOOT_PART}:1m:+512m" -t "${BOOT_PART}:ef00" "$BOOT_DISK"
+sgdisk -n "${BOOT_PART}:1m:+512m" -t "${BOOT_PART}:ef00" -c "${BOOT_PART}:EFI System Partition" "$BOOT_DISK"
+
+# Create SWAP partition
+sgdisk -n "${SWAP_PART}:1m:+12G" -t "${SWAP_PART}:8200" -c "${SWAP_PART}:Linux Ubuntu SWAP" "$SWAP_DISK"
 
 # Create zpool partition
-sgdisk -n "${POOL_PART}:0:-10m" -t "${POOL_PART}:bf00" "$POOL_DISK"
+sgdisk -n "${POOL_PART}:0:-10m" -t "${POOL_PART}:bf00" -c "${POOL_PART}:Ubuntu ZFS zroot Partition" "$POOL_DISK"
 
 # ZFS verification
 zpool status
@@ -97,6 +108,8 @@ zpool status
 
  zfs create -o mountpoint=/home $ZPOOL_NAME/home
 
+ zfs create -o mountpoint=/home/$USERNAME $ZPOOL_NAME/home_$USERNAME
+
  zpool set bootfs=$ZPOOL_NAME/ROOT/$OS_ID $ZPOOL_NAME
 
 # Export, then re-import with a temporary mountpoint of $MOUNT_POINT
@@ -105,7 +118,7 @@ zpool status
  zpool import -N -R $MOUNT_POINT $ZPOOL_NAME
  zfs mount $ZPOOL_NAME/ROOT/$OS_ID
  zfs mount $ZPOOL_NAME/home
-
+ zfs mount $ZPOOL_NAME/home_$USERNAME
 
 # Verify that everything is mounted correctly
 mount | grep mnt
@@ -194,7 +207,7 @@ apt update
 apt upgrade -y
 
 # Install helpers
-apt install -y --no-install-recommends linux-generic locales keyboard-configuration console-setup shim-signed
+apt install -y --no-install-recommends linux-generic locales keyboard-configuration console-setup shim-signed mokutil
 
 apt install -y locales tzdata keyboard-configuration console-setup
 
@@ -270,13 +283,16 @@ apt install -y ethtool ifupdown tcpdump nmap nano htop openssh-server git tmux
 echo "Installing Gnome Desktop environment with Wayland"
 echo "and Support compatibility for running individual X11 applications..."
 apt install -y ubuntu-desktop gnome-session gnome-session-common gnome-shell-ubuntu-extensions gnome-shell gnome-shell-common gnome-shell-extensions gnome-shell-extensions-common gnome-shell-extension-appindicator gnome-shell-extension-apps-menu gnome-shell-extension-auto-move-windows gnome-shell-extension-desktop-icons-ng 
-apt install -y gnome-software gdm3 xwayland ubuntu-restricted-extras network-manager-gnome gnome-control-center
+apt install -y gdm3 xwayland
 
  systemctl start gdm3
  systemctl enable gdm3
  systemctl status gdm3
+ 
+export DEBIAN_FRONTEND=noninteractive
+apt install -y gnome-software ubuntu-restricted-extras network-manager-gnome gnome-control-center
 
-# Installing IDE Pycharm-Community | PyCharm Installation Instructions : From https://wiki.debian.org/JetBrains
+# Installing IDE Pycharm-Community | PyCharm Installation Instructions : 
 echo "Installing IDE Pycharm-Community..."
 
 
