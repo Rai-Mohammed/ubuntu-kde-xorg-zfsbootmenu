@@ -178,8 +178,8 @@ cat /etc/passwd | grep $USERNAME
 
 # Copy default shell files (if necessary).
 # If you created the directory manually, you may need to copy default shell configuration files.
-# cp -r /etc/skel/. /home/$USERNAME/
-# chown -R $USERNAME:$USERNAME /home/$USERNAME/
+cp -r /etc/skel/. /home/$USERNAME/
+chown -R $USERNAME:$USERNAME /home/$USERNAME/
 
 #For a more automated and robust solution, use mkhomedir_helper if available
 
@@ -291,9 +291,13 @@ apt install -y ethtool ifupdown tcpdump nmap nano htop openssh-server git tmux
 # Installing Gnome Desktop environment with Wayland and Support compatibility for running individual X11 applications
 echo "Installing Gnome Desktop environment with Wayland"
 echo "and Support compatibility for running individual X11 applications..."
+
 export DEBIAN_FRONTEND=noninteractive
-apt install -y ubuntu-desktop gdm3 xwayland ubuntu-restricted-extras network-manager-gnome snapd
-snap install snap-store bare core22 core24 desktop-security-center firefox firmware-updater gnome-42-2204 gtk-common-themes snapd 
+apt install -y ubuntu-desktop gdm3 xwayland ubuntu-restricted-extras network-manager-gnome snapd gnome-shell-extensions
+
+usermod -aG sudo,audio,cdrom,dip,floppy,plugdev,operator,netdev,video $USERNAME
+export DEBIAN_FRONTEND=interactive
+sudo su $USERNAME -c "snap install snap-store bare core22 core24 gnome-42-2204 desktop-security-center firefox firmware-updater gtk-common-themes"
 
  systemctl start gdm3
  systemctl enable gdm3
