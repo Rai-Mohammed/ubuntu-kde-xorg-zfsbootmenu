@@ -293,8 +293,21 @@ echo "Installing  KDE Plasma 6 Desktop environment with Xorg"
 echo "and Support compatibility for running individual X11 applications..."
 
 export DEBIAN_FRONTEND=noninteractive
-apt install -y kde-plasma-desktop ubuntu-restricted-extras dbus-x11 snapd 
+apt install -y kde-plasma-desktop ubuntu-restricted-extras dbus-x11 libreoffice libreoffice-qt6
+apt install -y hunspell-ar hunspell-en-us hunspell-fr libreoffice-help-en-us libreoffice-help-fr libreoffice-l10n-ar libreoffice-l10n-fr hyphen-en-us hyphen-fr snapd 
 
+# Configure apt sources inside Chroot
+
+    cat  > /usr/bin/libreoffice <<EOF_APT_LIBREOFFICE
+    # For libreoffice-qt6 plugin
+    SAL_USE_VCLPLUGIN=qt6
+    export SAL_USE_VCLPLUGIN
+
+    # Increse the resolustion of libreoffice
+    SAL_FORCEDPI=120
+    export SAL_FORCEDPI
+EOF_APT_LIBREOFFICE
+    
 # Creating ~/.xinitrc to explicitly launch KDE with a D-Bus session:
 echo "Creating /home/$USERNAME/.xinitrc to explicitly launch KDE with a D-Bus session..."
 echo 'exec dbus-launch --exit-with-session startplasma-x11' > /home/$USERNAME/.xinitrc
@@ -302,7 +315,7 @@ chmod +x ~/.xinitrc
 
 usermod -aG sudo,audio,cdrom,dip,floppy,plugdev,operator,netdev,video,render $USERNAME
 export DEBIAN_FRONTEND=interactive
-sudo su $USERNAME -c "snap install bare core22 core24"
+sudo su $USERNAME -c "snap install bare core18 core20 core22 core24 mesa-2404 telegram-desktop"
 
  systemctl start sddm
  systemctl enable sddm
