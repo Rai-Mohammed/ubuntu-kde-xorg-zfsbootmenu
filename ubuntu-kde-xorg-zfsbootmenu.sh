@@ -7,19 +7,19 @@ PHY_DRIVE="/dev/sda"
 
 # First, define variables that refer to the disk and partition number that will hold boot files:
 # Single SATA disk :
-BOOT_DISK="/dev/sda"
+BOOT_DISK=$PHY_DRIVE
 BOOT_PART="1"
 BOOT_DEVICE="${BOOT_DISK}${BOOT_PART}"
 
 # Second, define variables that refer to the disk and partition number that will hold swap files:
 # Single SATA disk :
-SWAP_DISK="/dev/sda"
+SWAP_DISK=$PHY_DRIVE
 SWAP_PART="2"
 SWAP_DEVICE="${SWAP_DISK}${SWAP_PART}"
 
 # Next, define variables that refer to the disk and partition number that will hold the ZFS pool:
 # Single SATA disk :
-POOL_DISK="/dev/sda"
+POOL_DISK=$PHY_DRIVE
 POOL_PART="3"
 POOL_DEVICE="${POOL_DISK}${POOL_PART}"
 
@@ -37,7 +37,7 @@ USER_PASSWORD="fill_your_user_password"
 ROOT_PASSWORD="fill_your_root_password"
 HOSTNAME="fill_your_hostname"
 
-IF_PHY_DNS="8.8.8.8,8.8.4.4"
+IF_PHY_DNS="1.1.1.1,8.8.8.8,9.9.9.9,8.8.4.4"
 
 IF_PHY_NET="enp0s3"
 IF_PHY_ADDRESS_NET="10.0.2.228"
@@ -253,11 +253,11 @@ swapon "$SWAP_DEVICE"
 # Find the UUID of the new swap partition: blkid
 blkid | grep swap
 
-# Create an fstab entry and mount
+# Create an fstab entry and mount for the BOOT_DEVICE
 echo "\$(blkid | grep "$BOOT_DEVICE" | cut -d ' ' -f 2) /boot/efi vfat defaults 0 0" >> /etc/fstab
 
 # Make Swap Permanent (/etc/fstab)
-# Add this line to the end: UUID=your-uuid-here none swap sw 0 0
+# Add this line to the end: UUID=SWAP_DEVICE-uuid-here none swap sw 0 0
 echo "\$(blkid | grep "$SWAP_DEVICE" | cut -d ' ' -f 2) none swap sw 0 0" >> /etc/fstab
 
 cat /etc/fstab
@@ -338,6 +338,7 @@ echo "Installing IDE Pycharm-Community..."
 
 # Installing Virtual Studio Code | VSCode Installation Instructions : 
 echo "Installing Virtual Studio Code..."
+
 
 # Configure Ubuntu Networking
 
