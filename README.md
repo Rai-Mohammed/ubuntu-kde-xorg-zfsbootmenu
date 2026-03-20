@@ -1,5 +1,5 @@
-# Ubuntu 25.10, Gnome DE, Wayland with ZFSBootMenu Installation Script
-Bash script to install Ubuntu 25.10, Gnome DE, Wayland with ZFS on Root and ZFSBootMenu, the ZFSBootMenu page reference is : https://docs.zfsbootmenu.org/en/latest/guides/ubuntu/uefi.html
+# Ubuntu 25.10, KDE Plasma 6 DE, Xorg with ZFSBootMenu Installation Script
+Bash script to install Ubuntu 25.10, KDE Plasma 6 DE, Xorg with ZFS on Root and ZFSBootMenu, the ZFSBootMenu page reference is : https://docs.zfsbootmenu.org/en/latest/guides/ubuntu/uefi.html
 
 ## Prerequisites
 
@@ -91,12 +91,12 @@ Bash script to install Ubuntu 25.10, Gnome DE, Wayland with ZFS on Root and ZFSB
 
    ```bash   
    root@debian:~# apt install curl
-   root@debian:~# curl -O https://raw.githubusercontent.com/Rai-Mohammed/ubuntu-gnome-wayland-zfsbootmenu/main/ubuntu-gnome-wayland-zfsbootmenu.sh
+   root@debian:~# curl -O https://raw.githubusercontent.com/Rai-Mohammed/ubuntu-kde-xorg-zfsbootmenu/main/ubuntu-kde-xorg-zfsbootmenu.sh
 
    # Make the necessary changes to the installation script
-   root@debian:~# nano ubuntu-gnome-wayland-zfsbootmenu.sh
+   root@debian:~# nano ubuntu-kde-xorg-zfsbootmenu.sh
 
-   root@debian:~# chmod +x ubuntu-gnome-wayland-zfsbootmenu.sh
+   root@debian:~# chmod +x ubuntu-kde-xorg-zfsbootmenu.sh
    root@debian:~# ./ubuntu-gnome-wayland-zfsbootmenu.sh
    ```
 
