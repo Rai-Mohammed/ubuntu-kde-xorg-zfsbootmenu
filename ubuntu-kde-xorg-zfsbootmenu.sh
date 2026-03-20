@@ -258,6 +258,8 @@ echo "\$(blkid | grep "$BOOT_DEVICE" | cut -d ' ' -f 2) /boot/efi vfat defaults 
 
 # Make Swap Permanent (/etc/fstab)
 # Add this line to the end: UUID=your-uuid-here none swap sw 0 0
+echo "\$(blkid | grep "$SWAP_DEVICE" | cut -d ' ' -f 2) none swap sw 0 0" >> /etc/fstab
+
 cat /etc/fstab
 
 mkdir -p /boot/efi
