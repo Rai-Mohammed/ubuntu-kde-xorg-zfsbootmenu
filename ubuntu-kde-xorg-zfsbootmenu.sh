@@ -336,6 +336,10 @@ systemctl status dbus
  
 export DEBIAN_FRONTEND=noninteractive
 
+# Upgrade KDE plasma 6.5.6 release for Ubuntu 25.10
+add-apt-repository ppa:kubuntu-ppa/backports -y
+apt full-upgrade -y
+
 # Installing IDE Pycharm-Community | PyCharm Installation Instructions : 
 echo "Installing IDE Pycharm-Community..."
 
