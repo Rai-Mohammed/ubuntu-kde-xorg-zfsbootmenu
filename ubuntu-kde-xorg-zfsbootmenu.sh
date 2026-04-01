@@ -114,6 +114,8 @@ zpool status
 
  zpool set bootfs=$ZPOOL_NAME/ROOT/$OS_ID $ZPOOL_NAME
 
+ zpool set cachefile=/etc/zfs/zpool.cache $ZPOOL_NAME
+
 # Export, then re-import with a temporary mountpoint of $MOUNT_POINT
 
  zpool export $ZPOOL_NAME
